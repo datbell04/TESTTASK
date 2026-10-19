@@ -1,6 +1,6 @@
 # TESTTASK
 
-Laravel 11 chạy bằng Docker. Tài khoản và đề thi nằm ở MySQL. Bài làm nằm ở MongoDB.
+Laravel 11 chạy trên PHP 8.4 bằng Docker. Tài khoản và đề thi nằm ở MySQL. Bài làm nằm ở MongoDB.
 
 ## Chạy dự án
 
@@ -40,6 +40,8 @@ Cổng trên máy host được đổi để khỏi đụng MongoDB hoặc MySQL
 | MongoDB 7 | 27017 | 27018 |
 
 App trong container vẫn nối `mysql:3306` và `mongo:27017`. Không cần bật MongoDB cài sẵn trên Windows.
+
+Image PHP là 8.4 vì lock file kéo Symfony 8, và các gói đó yêu cầu PHP >= 8.4.1. Laravel 11 chạy được trên bản này, vẫn thỏa điều kiện PHP >= 8.2.
 
 ## Vì sao dữ liệu chia hai nơi
 
