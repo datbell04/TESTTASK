@@ -1,66 +1,54 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TESTTASK
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 11 chạy bằng Docker. Tài khoản và đề thi nằm ở MySQL. Bài làm nằm ở MongoDB.
 
-## About Laravel
+## Chạy dự án
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Cần Docker Desktop. Bốn lệnh sau là đủ, lần đầu có thể mất vài phút vì phải build image và cài dependency:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```bash
+git clone https://github.com/datbell04/TESTTASK.git
+cd TESTTASK
+docker compose up -d --build
+docker compose exec app php artisan app:check-connections
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Container PHP tự copy `.env`, tạo `APP_KEY`, rồi chạy `php artisan migrate --seed`. Mở http://localhost:8080 để xem trang Laravel.
 
-## Learning Laravel
+Kết quả mong đợi của lệnh kiểm tra:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```text
+MySQL: OK
+MongoDB: OK
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Tài khoản mẫu, mật khẩu đều là `password`:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Email | Vai trò |
+| --- | --- |
+| admin@example.com | admin |
+| student@example.com | student |
 
-## Laravel Sponsors
+Đề thi mẫu: `Đề thi mẫu Laravel` (60 phút), do admin tạo. Một bài làm của student được ghi vào collection `submissions`.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Cổng trên máy host được đổi để khỏi đụng MongoDB hoặc MySQL cài sẵn:
 
-### Premium Partners
+| Dịch vụ | Trong Docker | Trên máy host |
+| --- | --- | --- |
+| Nginx | 80 | 8080 |
+| MySQL 8.0 | 3306 | 3307 |
+| MongoDB 7 | 27017 | 27018 |
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+App trong container vẫn nối `mysql:3306` và `mongo:27017`. Không cần bật MongoDB cài sẵn trên Windows.
 
-## Contributing
+## Vì sao dữ liệu chia hai nơi
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+MySQL giữ dữ liệu có quan hệ cố định: tài khoản (`users.role`) và đề thi (`exams.created_by` trỏ về user). Cần khóa ngoại, email duy nhất, và migration.
 
-## Code of Conduct
+MongoDB giữ bài làm. Một bài có nhiều câu trả lời, mỗi câu một dạng khác nhau (trắc nghiệm hoặc tự luận) nên để nguyên một document lồng nhau, khỏi tách thêm bảng và join.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Những gì chưa làm được và vì sao
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Chưa có đăng nhập, màn hình làm bài, hay API sửa đề. Sáu task hiện tại chỉ yêu cầu dựng môi trường, nối hai database, dữ liệu mẫu và lệnh kiểm tra kết nối.
+- Laravel 11 đã hết hạn hỗ trợ từ tháng 3/2026 và đang có security advisory. Composer từ chối cài cho đến khi tắt `policy.advisories.block`. Vẫn dùng Laravel 11 vì đề bắt buộc, không nâng lên Laravel 12.
+- `mongodb/laravel-mongodb` khóa ở `5.8.2`. Bản `5.9` trở đi yêu cầu Laravel 12, không cài được cùng skeleton này.
